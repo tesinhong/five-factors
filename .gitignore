@@ -1,1 +1,7 @@
 *.env
+
+data-cache/
+
+*quant.py
+
+*fractions.nc.gz
