@@ -1,2 +1,4 @@
 # five-factor
-# five-factors
+
+#five.pyがfive-factorのコード
+#get_data.pyでアップルのデータをcsvファイルに変換
