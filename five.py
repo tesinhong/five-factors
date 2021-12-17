@@ -31,7 +31,6 @@ def assetPriceReg(df_stk):
 
     df_stock_factor = pd.merge(df_stk,df_factors,left_index=True,right_index=True) # Merging the stock and factor returns dataframes together
     df_stock_factor['XsRet'] = df_stock_factor['Returns'] - df_stock_factor['RF'] # Calculating excess returns
-    print(df_stock_factor)
 
     # Running CAPM, FF3, and FF5 models.
     CAPM = sm.ols(formula = 'XsRet ~ MKT', data=df_stock_factor).fit(cov_type='HAC',cov_kwds={'maxlags':1})
@@ -59,8 +58,7 @@ def assetPriceReg(df_stk):
                              'Adjusted R2':lambda x: "{:.4f}".format(x.rsquared_adj)},
                              regressor_order = ['Intercept', 'MKT', 'SMB', 'HML', 'RMW', 'CMA'])
 
-    #print(dfoutput)
-    #print(df_stock_factor)
+    print(dfoutput)
 
     return results_df
 
@@ -69,8 +67,6 @@ import sys
 import os
 
 home = str(Path.home())
-
-inputDir = '/Desktop/' 
 
 fullDir = '/Users/hongtaishen/Desktop/programming/work/vagrant/python/kandai/quant/'
 
