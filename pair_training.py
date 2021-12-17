@@ -88,4 +88,5 @@ portValue
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.plot(portVa
+plt.plot(portValue,color="b")
+plt.show()
