@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
+import plotly.graph_objs as go
 
 import statsmodels.formula.api as sm # module for stats models
 from statsmodels.iolib.summary2 import summary_col # module for presenting stats models outputs nicely
@@ -14,10 +15,15 @@ def price2ret(prices,retType='simple'):
 
 def assetPriceReg(df_stk):
     import pandas_datareader.data as web  # module for reading datasets directly from the web
+    from datetime import datetime
+    st = datetime(2021, 10, 1)
+    ed = datetime(2021, 12, 1)
 
     # Reading in factor data
+    #df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', st,ed)[0]
+    #print(df_factors)
     df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench')[0]
-    print(df_factors)
+    #print(df_factors)
     df_factors.rename(columns={'Mkt-RF': 'MKT'}, inplace=True)
     df_factors['MKT'] = df_factors['MKT']/100
     df_factors['SMB'] = df_factors['SMB']/100
@@ -27,6 +33,7 @@ def assetPriceReg(df_stk):
 
     df_stock_factor = pd.merge(df_stk,df_factors,left_index=True,right_index=True) # Merging the stock and factor returns dataframes together
     df_stock_factor['XsRet'] = df_stock_factor['Returns'] - df_stock_factor['RF'] # Calculating excess returns
+    print(df_stock_factor)
 
     # Running CAPM, FF3, and FF5 models.
     CAPM = sm.ols(formula = 'XsRet ~ MKT', data=df_stock_factor).fit(cov_type='HAC',cov_kwds={'maxlags':1})
@@ -54,7 +61,8 @@ def assetPriceReg(df_stk):
                              'Adjusted R2':lambda x: "{:.4f}".format(x.rsquared_adj)},
                              regressor_order = ['Intercept', 'MKT', 'SMB', 'HML', 'RMW', 'CMA'])
 
-    print(dfoutput)
+    #print(dfoutput)
+    #print(df_stock_factor)
 
     return results_df
 
@@ -69,19 +77,31 @@ inputDir = '/Desktop/'
 fullDir = '/Users/hongtaishen/Desktop/programming/work/vagrant/python/kandai/quant/'
 
 stkName = 'AAPL'
-fileName = 'df_price_AAPL_2021-11-12' + '.csv'
+fileName = 'df_price_AAPL_2021-12-17' + '.csv'
 readFile = fullDir+fileName
 
 df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
-df_stk.head()
+#df_stk.head()
+#print(df_stk)
 
-df_stk.drop(['Volume'],axis=1,inplace=True)
-df_stk.plot()
+def calculate(df_stk):
+  df_stk.head()
+  df_stk.drop(['Volume'],axis=1,inplace=True)
+  df_stk.plot()
+  
+  df_stk['Returns'] = price2ret(df_stk[['Adj Close']])
+  df_stk = df_stk.dropna()
+  df_stk.head()
+  df_stk['Returns'].plot()
+  #print(df_stk)
+  #print(df_stk['Adj Close'])
+  #print(df_stk['Returns'].hist(bins=20))
+  df_regOutput = assetPriceReg(df_stk)
+  print(df_regOutput)
+  #return df_regOutput
 
-df_stk['Returns'] = price2ret(df_stk[['Adj Close']])
-df_stk = df_stk.dropna()
-df_stk.head()
-#df_stk['Returns'].plot()
-#print(df_stk['Returns'].hist(bins=20))
-df_regOutput = assetPriceReg(df_stk)
-print(df_regOutput)
+calculate(df_stk)
+fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
+readOldFile = fullDir+fileName
+df_stk = pd.read_csv(readOldFile,index_col='Date',parse_dates=True)
+calculate(df_stk)
