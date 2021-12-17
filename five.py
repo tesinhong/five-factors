@@ -15,15 +15,13 @@ def price2ret(prices,retType='simple'):
 
 def assetPriceReg(df_stk):
     import pandas_datareader.data as web  # module for reading datasets directly from the web
-    from datetime import datetime
-    st = datetime(2021, 10, 1)
-    ed = datetime(2021, 12, 1)
+    #from datetime import datetime
+    #st = datetime(2021, 10, 1)
+    #ed = datetime(2021, 12, 1)
+    #df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench    ', st,ed)[0]
 
     # Reading in factor data
-    #df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', st,ed)[0]
-    #print(df_factors)
     df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench')[0]
-    #print(df_factors)
     df_factors.rename(columns={'Mkt-RF': 'MKT'}, inplace=True)
     df_factors['MKT'] = df_factors['MKT']/100
     df_factors['SMB'] = df_factors['SMB']/100
@@ -81,9 +79,8 @@ fileName = 'df_price_AAPL_2021-12-17' + '.csv'
 readFile = fullDir+fileName
 
 df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
-#df_stk.head()
-#print(df_stk)
 
+# csvファイルの処理の関数
 def calculate(df_stk):
   df_stk.head()
   df_stk.drop(['Volume'],axis=1,inplace=True)
@@ -93,15 +90,17 @@ def calculate(df_stk):
   df_stk = df_stk.dropna()
   df_stk.head()
   df_stk['Returns'].plot()
-  #print(df_stk)
-  #print(df_stk['Adj Close'])
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk)
   print(df_regOutput)
-  #return df_regOutput
 
+# 新しい方のアップルのデータを計算
 calculate(df_stk)
+
+# 古い方のアップルのデータを取得
 fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
 readOldFile = fullDir+fileName
 df_stk = pd.read_csv(readOldFile,index_col='Date',parse_dates=True)
+
+# 古い方のアップルのデータを計算
 calculate(df_stk)
