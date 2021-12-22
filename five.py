@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 import numpy as np 
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
@@ -29,7 +30,8 @@ def assetPriceReg(df_stk):
     df_factors['RMW'] = df_factors['RMW']/100
     df_factors['CMA'] = df_factors['CMA']/100
 
-    df_stock_factor = pd.merge(df_stk,df_factors,left_index=True,right_index=True) # Merging the stock and factor returns dataframes together
+    df_stock_factor = pd.merge(df_stk,df_factors,left_index=True,right_index=True) 
+    # Merging the stock and factor returns dataframes together
     df_stock_factor['XsRet'] = df_stock_factor['Returns'] - df_stock_factor['RF'] # Calculating excess returns
 
     # Running CAPM, FF3, and FF5 models.
@@ -89,6 +91,21 @@ def calculate(df_stk):
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk)
   print(df_regOutput)
+  #FF3coefと1を入れる空の配列を作成
+  array = np.array([])
+  one = np.array([])
+  #np.dot(df_regOutput['FF3coef'], 1が入った配列)をするとnanになるためfor文で計算
+  for i in df_regOutput['FF3coeff']:
+    #iに入ってる値がnanなのかチェック
+    if math.isnan(i) == False:
+      #nanじゃなければそれぞれ値を配列に追加
+      array = np.append(array, i)
+      one = np.append(one, 1)
+    else:
+      #nanが来た時点でnp.dotで計算をしてfor文を終了
+      test = np.dot(array, one)
+      break
+  print(test)
 
 # 新しい方のアップルのデータを計算
 calculate(df_stk)
