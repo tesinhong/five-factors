@@ -14,6 +14,15 @@ class overwrite:
 # predictという変数にoverwriteクラスをインスタンス化
 predict = overwrite
 
+# csvファイルにする関数
+def pdCsv(fileName):
+  fullDir = '/Users/hongtaishen/Desktop/programming/work/vagrant/python/kandai/quant/'
+  readFile = fullDir+fileName
+
+  # df_stkをグローバル変数に
+  global df_stk
+  df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
+
 def price2ret(prices,retType='simple'):
     if retType == 'simple':
         ret = (prices/prices.shift(1))-1
@@ -71,21 +80,9 @@ def assetPriceReg(df_stk):
 
     return results_df
 
-from pathlib import Path
-import sys
-import os
 
-home = str(Path.home())
 
-fullDir = '/Users/hongtaishen/Desktop/programming/work/vagrant/python/kandai/quant/'
-
-stkName = 'AAPL'
-fileName = 'df_price_AAPL_2021-12-17' + '.csv'
-readFile = fullDir+fileName
-
-df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
-
-# csvファイルの処理の関数
+# csvファイルを処理する関数
 def calculate(df_stk, predict):
   df_stk.head()
   df_stk.drop(['Volume'],axis=1,inplace=True)
@@ -95,39 +92,48 @@ def calculate(df_stk, predict):
   df_stk = df_stk.dropna()
   df_stk.head()
   df_stk['Returns'].plot()
-  #print(df_stk)
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk)
   print(df_regOutput)
-
+ 
   #FF3coefと1を入れる空の配列を作成
   array = np.array([])
   one = np.array([])
-
+ 
   #np.dot(df_regOutput['FF3coef'], 1が入った配列)をするとnanになるためfor文で計算
   for i in df_regOutput['FF3coeff']:
-
+ 
     #iに入ってる値がnanなのかチェック
     if math.isnan(i) == False:
-
+ 
       #nanじゃなければそれぞれ値を配列に追加
       array = np.append(array, i)
       one = np.append(one, 1)
     else:
-
+ 
       #nanが来た時点でnp.dotで計算をしてfor文を終了
       predict.test = np.dot(array, one)
       break
-  #print(test)
+
+from pathlib import Path
+import sys
+import os
+
+home = str(Path.home())
+
+stkName = 'AAPL'
+fileName = 'df_price_AAPL_2021-12-17' + '.csv'
+
+# pdCsv関数を呼び出し
+pdCsv(fileName)
 
 # 新しい方のアップルのデータを計算
 calculate(df_stk, predict)
 print(predict.test)
 
-# 古い方のアップルのデータを取得
+# 古い方のアップルのデータを取得、関数呼び出し
 fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
-readOldFile = fullDir+fileName
-df_stk = pd.read_csv(readOldFile,index_col='Date',parse_dates=True)
+pdCsv(fileName)
 
 # 古い方のアップルのデータを計算
 calculate(df_stk, predict)
