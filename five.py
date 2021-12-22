@@ -7,6 +7,13 @@ import plotly.graph_objs as go
 import statsmodels.formula.api as sm # module for stats models
 from statsmodels.iolib.summary2 import summary_col # module for presenting stats models outputs nicely
 
+# 後でnp.dotの値を上書きするclassを作成
+class overwrite:
+  test = 0
+
+# predictという変数にoverwriteクラスをインスタンス化
+predict = overwrite
+
 def price2ret(prices,retType='simple'):
     if retType == 'simple':
         ret = (prices/prices.shift(1))-1
@@ -79,7 +86,7 @@ readFile = fullDir+fileName
 df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
 
 # csvファイルの処理の関数
-def calculate(df_stk):
+def calculate(df_stk, predict):
   df_stk.head()
   df_stk.drop(['Volume'],axis=1,inplace=True)
   df_stk.plot()
@@ -88,6 +95,7 @@ def calculate(df_stk):
   df_stk = df_stk.dropna()
   df_stk.head()
   df_stk['Returns'].plot()
+  #print(df_stk)
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk)
   print(df_regOutput)
@@ -108,12 +116,13 @@ def calculate(df_stk):
     else:
 
       #nanが来た時点でnp.dotで計算をしてfor文を終了
-      test = np.dot(array, one)
+      predict.test = np.dot(array, one)
       break
-  print(test)
+  #print(test)
 
 # 新しい方のアップルのデータを計算
-calculate(df_stk)
+calculate(df_stk, predict)
+print(predict.test)
 
 # 古い方のアップルのデータを取得
 fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
@@ -121,4 +130,5 @@ readOldFile = fullDir+fileName
 df_stk = pd.read_csv(readOldFile,index_col='Date',parse_dates=True)
 
 # 古い方のアップルのデータを計算
-calculate(df_stk)
+calculate(df_stk, predict)
+print(predict.test)
