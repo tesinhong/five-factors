@@ -91,17 +91,22 @@ def calculate(df_stk):
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk)
   print(df_regOutput)
+
   #FF3coefと1を入れる空の配列を作成
   array = np.array([])
   one = np.array([])
+
   #np.dot(df_regOutput['FF3coef'], 1が入った配列)をするとnanになるためfor文で計算
   for i in df_regOutput['FF3coeff']:
+
     #iに入ってる値がnanなのかチェック
     if math.isnan(i) == False:
+
       #nanじゃなければそれぞれ値を配列に追加
       array = np.append(array, i)
       one = np.append(one, 1)
     else:
+
       #nanが来た時点でnp.dotで計算をしてfor文を終了
       test = np.dot(array, one)
       break
