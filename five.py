@@ -2,7 +2,6 @@ import pandas as pd
 import math
 import numpy as np 
 import matplotlib.pyplot as plt
-import plotly.graph_objs as go
 
 import statsmodels.formula.api as sm # module for stats models
 from statsmodels.iolib.summary2 import summary_col # module for presenting stats models outputs nicely
@@ -18,7 +17,6 @@ predict = overwrite
 def pdCsv(fileName):
   fullDir = '/Users/hongtaishen/Desktop/programming/work/vagrant/python/kandai/quant/'
   readFile = fullDir+fileName
-
   # df_stkをグローバル変数に
   global df_stk
   df_stk = pd.read_csv(readFile,index_col='Date',parse_dates=True)
@@ -45,6 +43,8 @@ def assetPriceReg(df_stk):
     df_factors['HML'] = df_factors['HML']/100
     df_factors['RMW'] = df_factors['RMW']/100
     df_factors['CMA'] = df_factors['CMA']/100
+    df_factors['One'] = 1
+    print(df_factors)
 
     df_stock_factor = pd.merge(df_stk,df_factors,left_index=True,right_index=True) 
     # Merging the stock and factor returns dataframes together
@@ -66,7 +66,8 @@ def assetPriceReg(df_stk):
     # DataFrame with coefficients and t-stats
     results_df = pd.DataFrame({'CAPMcoeff':CAPMcoeff,'CAPMtstat':CAPMtstat,
                                'FF3coeff':FF3coeff, 'FF3tstat':FF3tstat,
-                               'FF5coeff':FF5coeff, 'FF5tstat':FF5tstat},
+                               'FF5coeff':FF5coeff, 'FF5tstat':FF5tstat,
+                               'One':1},
     index = ['Intercept', 'MKT', 'SMB', 'HML', 'RMW', 'CMA'])
 
 
@@ -86,7 +87,7 @@ def assetPriceReg(df_stk):
 def calculate(df_stk, predict):
   df_stk.head()
   df_stk.drop(['Volume'],axis=1,inplace=True)
-  df_stk.plot()
+  #df_stk.plot()
   
   df_stk['Returns'] = price2ret(df_stk[['Adj Close']])
   df_stk = df_stk.dropna()
@@ -129,7 +130,28 @@ pdCsv(fileName)
 
 # 新しい方のアップルのデータを計算
 calculate(df_stk, predict)
+#print(df_stk['Returns'])
 print(predict.test)
+
+#a = np.array([]) # 1+rにpredict,testをかけた値を保存する配列
+#b = np.array([]) # 実際のリターンの配列
+#for i in df_stk['Returns']:
+  #if math.isnan(i) == True:
+   # continue
+  # ここ間違えてる！！！！！！！！！
+  #c = predict.test * i # aに保存する値を算出
+  #a = np.append(a, c) # cで出力された値を配列に追加
+  #b = np.append(b, i) # iの値を配列に追加
+
+#print(a)
+#print(b)
+
+fig, ax = plt.subplots()
+t = np.linspace(0, 10, 1000)
+#ax.plot(a, color="red", label="predict_return")
+#ax.plot(b, color="blue", label="aapl_return")
+fig.tight_layout()
+#plt.show()
 
 # 古い方のアップルのデータを取得、関数呼び出し
 fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
@@ -137,4 +159,4 @@ pdCsv(fileName)
 
 # 古い方のアップルのデータを計算
 calculate(df_stk, predict)
-print(predict.test)
+#print(predict.test)
