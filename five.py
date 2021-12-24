@@ -35,13 +35,13 @@ def price2ret(prices,retType='simple'):
 
 def assetPriceReg(df_stk, df_predict):
     import pandas_datareader.data as web  # module for reading datasets directly from the web
-    #from datetime import datetime
-    #st = datetime(2021, 10, 1)
-    #ed = datetime(2021, 12, 1)
-    #df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench    ', st,ed)[0]
+    from datetime import datetime
+    st = datetime(2021, 9, 1)
+    ed = datetime(2021, 12, 1)
+    df_predict.df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', st,ed)[0]
 
     # Reading in factor data
-    df_predict.df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench')[0]
+    #df_predict.df_factors = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench')[0]
     df_predict.df_factors.rename(columns={'Mkt-RF': 'MKT'}, inplace=True)
     df_predict.df_factors['Intercept'] = 1
     df_predict.df_factors['MKT'] = df_predict.df_factors['MKT']/100
@@ -52,6 +52,7 @@ def assetPriceReg(df_stk, df_predict):
     #print(df_predict.df_factors)
 
     df_stock_factor = pd.merge(df_stk,df_predict.df_factors,left_index=True,right_index=True) 
+    print(df_stock_factor)
     # Merging the stock and factor returns dataframes together
     df_stock_factor['XsRet'] = df_stock_factor['Returns'] - df_stock_factor['RF'] # Calculating excess returns
 
@@ -96,11 +97,10 @@ def calculate(df_stk, predict, df_predict):
   df_stk['Returns'] = price2ret(df_stk[['Adj Close']])
   df_stk = df_stk.dropna()
   df_stk.head()
-  df_stk['Returns'].plot()
+  #df_stk['Returns'].plot()
   #print(df_stk['Returns'].hist(bins=20))
   df_regOutput = assetPriceReg(df_stk, df_predict)
   print(df_regOutput)
-  print(df_predict.df_factors)
  
   #FF3coefと1を入れる空の配列を作成
   array = np.array([])
@@ -109,7 +109,6 @@ def calculate(df_stk, predict, df_predict):
   #np.dot(df_regOutput['FF3coef'], 1が入った配列)をするとnanになるためfor文で計算
   num = 0
   for i in df_regOutput['FF3coeff']:
-    print(i)
     #iに入ってる値がnanなのかチェック
     if math.isnan(i) == False:
  
@@ -128,9 +127,9 @@ def calculate(df_stk, predict, df_predict):
  
       #nanが来た時点でnp.dotで計算をしてfor文を終了
       predict.test = intercept + mkt + smb + hml
+      print(predict.test)
       break
 
-  print(predict.test)
 from pathlib import Path
 import sys
 import os
@@ -138,40 +137,35 @@ import os
 home = str(Path.home())
 
 stkName = 'AAPL'
-fileName = 'df_price_AAPL_2021-12-17' + '.csv'
+fileName = 'df_price_AAPL_2021-12-24' + '.csv'
 
 # pdCsv関数を呼び出し
 pdCsv(fileName)
 
 # 新しい方のアップルのデータを計算
 calculate(df_stk, predict, df_predict)
-#print(df_stk['Returns'])
-print(predict.test)
 
-a = np.array([]) # 1+rにpredict,testをかけた値を保存する配列
-b = np.array([]) # 実際のリターンの配列
-for i in df_stk['Returns']:
-  if math.isnan(i) == True:
-    continue
-  c = predict.test * i # aに保存する値を算出
-  a = np.append(a, c) # cで出力された値を配列に追加
-  b = np.append(b, i) # iの値を配列に追加
+#a = np.array([]) # 1+rにpredict,testをかけた値を保存する配列
+#b = np.array([]) # 実際のリターンの配列
+#num = 0
+#for i in predict.test:
+#  df_ret = df_stk['Returns'][num]
+ # if math.isnan(num) == True:
+  #  continue
+ # c = i * df_ret # aに保存する値を算出
+ # a = np.append(a, c) # cで出力された値を配列に追加
+ # b = np.append(b, i) # iの値を配列に追加
+ # num += 1
 
-print(a)
-print(b)
 
 fig, ax = plt.subplots()
-t = np.linspace(0, 10, 1000)
-ax.grid()
-ax.plot(a, color="red", label="predict_return")
-#ax.plot(b, color="blue", label="aapl_return")
-ax.legend(loc=0)
-fig.tight_layout()
+ax.plot(predict.test, color="red", label="predict_return")
+ax.plot(df_stk['Returns'], color="blue", label="aapl_return")
 plt.show()
 
 # 古い方のアップルのデータを取得、関数呼び出し
-fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
-pdCsv(fileName)
+#fileName = 'df_price_AAPL_2021-12-17_old_data' + '.csv'
+#pdCsv(fileName)
 
 # 古い方のアップルのデータを計算
 #calculate(df_stk, predict, df_predict)
